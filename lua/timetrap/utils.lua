@@ -40,6 +40,17 @@ local showFloatingPrompt = function (display_text, on_submit, on_close)
     end)
 end
 
+local splitLines = function (str)
+    local lines = {}
+    for s in str:gmatch("[^\r\n]+") do
+        table.insert(lines, s)
+    end
+
+    return lines
+end
+
+
+-- Module exports
 local M = {}
 
 M.prompt = function (display_text, type, on_submit, on_close)
@@ -50,5 +61,7 @@ M.prompt = function (display_text, type, on_submit, on_close)
         return showFloatingPrompt(display_text, on_submit, on_close)
     end
 end
+
+M.splitLines = splitLines
 
 return M
