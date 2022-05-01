@@ -1,5 +1,5 @@
-local utils = require("timetrap.utils")
-local configs = require("timetrap.config")
+local utils = require("timetrap_nvim.utils")
+local configs = require("timetrap_nvim.config")
 
 local cur_win = nil
 

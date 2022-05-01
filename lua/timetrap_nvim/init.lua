@@ -1,6 +1,6 @@
-local utils = require("timetrap.utils")
-local display = require("timetrap.display")
-local configs = require("timetrap.config")
+local utils = require("timetrap_nvim.utils")
+local display = require("timetrap_nvim.display")
+local configs = require("timetrap_nvim.config")
 
 local M = {}
 
