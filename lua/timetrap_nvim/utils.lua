@@ -56,9 +56,13 @@ end
 local parseRecordLine = function (buf, cursor)
     -- Get info positions in buffer (headers are in the second line)
     local headers_str = vim.api.nvim_buf_get_lines(buf, 1, 2, false)
+    headers_str = headers_str[1]
 
     local r, _ = unpack(cursor)
+    r = r - 1
+
     local cur_line = vim.api.nvim_buf_get_lines(buf, r, r+1, false)
+    cur_line = cur_line[1]
 
     local first_char = cur_line:sub(1,1)
     -- If the first character of the string is a space, it is not a record
@@ -78,7 +82,7 @@ local parseRecordLine = function (buf, cursor)
         local c = headers_str:sub(i, i)
         if c ~= " " then
             if was_space then
-                table.insert(headers_split, i)
+                table.insert(headers_split, i-1)
                 was_space = false
             end
         else
@@ -88,24 +92,35 @@ local parseRecordLine = function (buf, cursor)
 
     -- Split the line and return the info as a table
     local headers = {}
-    local from = 1
+    local from = 0
     for i=1, #headers_split do
         local h = headers_str:sub(from, headers_split[i])
         h = h:match("^%s*(.-)%s*$")
         table.insert(headers, h)
+        from = headers_split[i]
     end
+    local last_h = headers_str:sub(from, -1)
+    last_h = last_h:match("^%s*(.-)%s*$")
+    table.insert(headers, last_h)
 
     local values = {}
+    from = 0
     for i=1, #headers_split do
         local v = cur_line:sub(from, headers_split[i])
         v = v:match("^%s*(.-)%s*$")
         table.insert(values, v)
+        from = headers_split[i]
     end
+    local last_v = cur_line:sub(from, -1)
+    last_v = last_v:match("^%s*(.-)%s*$")
+    table.insert(values, last_v)
 
     local parsed = {}
     for i=1, #headers do
         parsed[headers[i]] = values[i]
     end
+    -- Fix Start time (remove " -")
+    parsed.Start = parsed.Start:sub(0, -3)
 
     return parsed
 end
