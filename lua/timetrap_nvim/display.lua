@@ -1,12 +1,15 @@
 local utils = require("timetrap_nvim.utils")
 local configs = require("timetrap_nvim.config")
+local Popup = require("nui.popup")
+local event = require("nui.utils.autocmd").event
 
 local cur_win = nil
+local cur_popup = nil
 
 local M = {}
 
 -- Display the "t display" output in a buffer
-M.timetrap_display = function (opts)
+M.timetrap_display_open = function (opts)
     opts = opts or {}
 
     local buf = opts.buf
@@ -15,6 +18,10 @@ M.timetrap_display = function (opts)
     local isRefresh = buf ~= nil
     if isRefresh == false and cur_win ~= nil then
         buf = vim.api.nvim_win_get_buf(cur_win)
+        isRefresh = true
+    end
+    if isRefresh == false and cur_popup ~= nil then
+        buf = cur_popup.bufnr
         isRefresh = true
     end
 
@@ -31,33 +38,53 @@ M.timetrap_display = function (opts)
     local win = nil
 
 
-    local w = math.floor(vim.o.columns * 0.8)
-    local h = math.floor(vim.o.lines * 0.8)
-
-    local c = ( vim.o.columns - (vim.o.columns * 0.8) ) / 2
-    local r = ( vim.o.lines - (vim.o.lines * 0.8) ) / 2
 
     if isRefresh == false then
         if win_type == "float" then
-            win = vim.api.nvim_open_win(buf, true, {
-                relative = "editor",
-                width = w,
-                height = h,
-                row = r,
-                col = c,
-                border = "rounded",
-                zindex = 25
+            local w = math.floor(vim.o.columns * 0.8)
+            local h = math.floor(vim.o.lines * 0.8)
+
+            local popup = Popup({
+                position = "50%",
+                size = {
+                    width = w,
+                    height = h,
+                },
+                enter = true,
+                border = {
+                    padding = {
+                        left = 1,
+                        right = 1,
+                    },
+                    style = configs.display.border
+                },
+                win_options = {
+                    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+                },
+                zindex = 25,
+                bufnr = buf
             })
+
+            popup:mount()
+
+            -- unmount component when cursor leaves buffer
+            popup:on(event.WinClosed, function()
+                M.timetrap_display_close()
+            end)
+
+            cur_popup = popup
 
         elseif win_type == "horizontal" then
             vim.api.nvim_command("split")
             win = vim.api.nvim_get_current_win()
             vim.api.nvim_win_set_buf(win, buf)
+            cur_win = win
 
         elseif win_type == "vertical" then
             vim.api.nvim_command("split")
             win = vim.api.nvim_get_current_win()
             vim.api.nvim_win_set_buf(win, buf)
+            cur_win = win
         end
     end
 
@@ -70,11 +97,27 @@ M.timetrap_display = function (opts)
     end
 end
 
+-- Close the timetrap display window
+M.timetrap_display_close = function ()
+    if cur_popup ~= nil then
+        cur_popup:unmount()
+        cur_popup = nil
+        return
+    end
+
+    if cur_win ~= nil then
+        vim.api.nvim_win_close(cur_win)
+        cur_win = nil
+    end
+end
+
+
 -- Add keymaps to the display buffer
 M.set_timetrap_display_keymaps = function (buf)
     -- Delete the record
     vim.api.nvim_buf_set_keymap(buf, "n", "d", "", {
         callback = function ()
+            print(vim.pretty_print(utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))))
             local r,_ = unpack(vim.api.nvim_win_get_cursor(0))
             r = r - 1 -- Cursor row is indexed from 1, while nvim_buf_get_lines requires 0
 
@@ -99,7 +142,7 @@ M.set_timetrap_display_keymaps = function (buf)
 
                     local output = vim.api.nvim_exec("!t kill -y --id " .. id, true)
 
-                    M.timetrap_display({buf = buf})
+                    M.timetrap_display_open({buf = buf})
                 end,
                 function ()
                     print("Aborted.")
@@ -113,7 +156,11 @@ M.set_timetrap_display_keymaps = function (buf)
     -- Close the window
     vim.api.nvim_buf_set_keymap(buf, "n", "q", "", {
         callback = function ()
-            vim.api.nvim_win_close(0, false)
+            if cur_popup ~= nil then
+                cur_popup:unmount()
+            else
+                vim.api.nvim_win_close(0, false)
+            end
         end,
         noremap = true
     })
@@ -121,7 +168,7 @@ M.set_timetrap_display_keymaps = function (buf)
     -- Refresh the window
     vim.api.nvim_buf_set_keymap(buf, "n", "r", "", {
         callback = function ()
-            M.timetrap_display({buf = buf})
+            M.timetrap_display_open({buf = buf})
         end,
         noremap = true
     })
@@ -146,7 +193,7 @@ M.set_timetrap_display_keymaps = function (buf)
                     local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' -s "'.. value .. '"', true)
                     print(output)
 
-                    M.timetrap_display({buf = buf})
+                    M.timetrap_display_open({buf = buf})
                 end,
                 function ()
                     print("Aborted.")
@@ -177,7 +224,7 @@ M.set_timetrap_display_keymaps = function (buf)
                     local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' -e "'.. value .. '"', true)
                     print(output)
 
-                    M.timetrap_display({buf = buf})
+                    M.timetrap_display_open({buf = buf})
                 end,
                 function ()
                     print("Aborted.")
@@ -208,7 +255,7 @@ M.set_timetrap_display_keymaps = function (buf)
                     local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' '.. value , true)
                     print(output)
 
-                    M.timetrap_display({buf = buf})
+                    M.timetrap_display_open({buf = buf})
                 end,
                 function ()
                     print("Aborted.")

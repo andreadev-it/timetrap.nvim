@@ -25,7 +25,7 @@ local add_commands = function ()
         "Timetrap",
         function (opts)
             if opts.fargs[1] == "d" then
-                display.timetrap_display({ win_type = configs.display.win_type })
+                display.timetrap_display_open({ win_type = configs.display.win_type })
                 return
             end
 
@@ -38,11 +38,20 @@ local add_commands = function ()
             end
         }
     )
+
+    vim.api.nvim_create_user_command(
+        "TimetrapClose",
+        function ()
+            display.timetrap_display_close()
+        end,
+        {}
+    )
 end
 
 M.setup = function (opts)
 
     configs.display.win_type = opts.display.win_type or configs.display.win_type
+    configs.display.border = opts.display.border or configs.display.border
 
     add_commands()
 end

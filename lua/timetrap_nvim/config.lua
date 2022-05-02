@@ -1,6 +1,7 @@
 local configs = {
     display = {
-        win_type = "horizontal"
+        win_type = "horizontal",
+        border = "rounded"
     }
 }
 
