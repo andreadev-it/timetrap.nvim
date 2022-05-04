@@ -4,7 +4,7 @@ local configs = require("timetrap_nvim.config")
 
 
 local showInputPrompt = function (display_text, on_submit, _)
-    local value = vim.fn.input(display_text)
+    local value = vim.fn.input(display_text .. " ")
     on_submit(value)
 end
 
