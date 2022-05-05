@@ -52,7 +52,7 @@ local splitLines = function (str)
     return lines
 end
 
--- Parse a line that corresponds to a record in the display table. If it is not a record, return nil
+-- Parse a line that corresponds to a entry in the display table. If it is not a entry, return nil
 local parseRecordLine = function (buf, cursor)
     -- Get info positions in buffer (headers are in the second line)
     local headers_str = vim.api.nvim_buf_get_lines(buf, 1, 2, false)
@@ -65,12 +65,12 @@ local parseRecordLine = function (buf, cursor)
     cur_line = cur_line[1]
 
     local first_char = cur_line:sub(1,1)
-    -- If the first character of the string is a space, it is not a record
+    -- If the first character of the string is a space, it is not a entry
     if first_char == " " then
         return
     end
 
-    -- And neither is a record if the first character is not a number
+    -- And neither is a entry if the first character is not a number
     if tonumber(first_char, 10) == nil then
         return
     end

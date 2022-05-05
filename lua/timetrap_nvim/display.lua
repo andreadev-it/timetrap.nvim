@@ -15,6 +15,12 @@ M.timetrap_display_write = function (buf)
     local lines = utils.splitLines(output)
     table.remove(lines, 1)
 
+    if #table <= 1 then
+        lines = {
+            "No entries found in the current sheet."
+        }
+    end
+
     vim.api.nvim_buf_set_option(buf, "modifiable", true)
 
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -27,13 +33,13 @@ M.display_help = function ()
     local lines = {
         "============== KEYBINDINGS =============",
         "",
-        "cs - Change Start time for record ",
+        "cs - Change Start time for entry ",
         "",
-        "ce - Change End time for record",
+        "ce - Change End time for entry",
         "",
-        "cn - Change Notes for record",
+        "cn - Change Notes for entry",
         "",
-        "d  - Delete the record",
+        "d  - Delete the entry",
         "",
         "q  - Quit the window",
         "",
@@ -161,15 +167,15 @@ M.timetrap_display_close = function ()
     end
 end
 
--- Delete record keymap
-local _keymap_delete_record = function (buf)
-    local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+-- Delete entry keymap
+local _keymap_delete_entry = function (buf)
+    local entry = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
 
-    if record == nil then
+    if entry == nil then
         return
     end
 
-    local id = record.Id
+    local id = entry.Id
 
     utils.prompt("Deleting item with id " .. id .. ". Are you sure? (y/n)", configs.prompts,
         function (choice)
@@ -194,13 +200,13 @@ end
 
 -- Change Start Time keymap
 local _keymap_change_start_time = function (buf)
-    local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+    local entry = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
 
-    if record == nil then
+    if entry == nil then
         return
     end
 
-    local id = record.Id
+    local id = entry.Id
 
     utils.prompt("Insert new starting time for item #"..id..":", configs.prompts,
         function (value)
@@ -218,13 +224,13 @@ end
 
 -- Change End Time keymap
 local _keymap_change_end_time = function (buf)
-    local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+    local entry = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
 
-    if record == nil then
+    if entry == nil then
         return
     end
 
-    local id = record.Id
+    local id = entry.Id
 
     utils.prompt("Insert new ending time for item #"..id..":", configs.prompts,
         function (value)
@@ -240,15 +246,15 @@ local _keymap_change_end_time = function (buf)
     )
 end
 
--- Change a record note keymap
+-- Change a entry note keymap
 local _keymap_change_note = function (buf)
-    local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+    local entry = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
 
-    if record == nil then
+    if entry == nil then
         return
     end
 
-    local id = record.Id
+    local id = entry.Id
 
     utils.prompt("Insert new note for item #"..id..":", configs.prompts,
         function (value)
@@ -268,10 +274,10 @@ end
 
 -- Add keymaps to the display buffer
 M.set_timetrap_display_keymaps = function (buf)
-    -- Delete the record
+    -- Delete the entry
     vim.api.nvim_buf_set_keymap(buf, "n", "d", "", {
         callback = function ()
-            _keymap_delete_record(buf)
+            _keymap_delete_entry(buf)
         end,
         noremap = true
     })

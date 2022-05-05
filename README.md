@@ -35,13 +35,13 @@ You can use all classic timetrap commands by running:
 The useful part comes when you're launching the display command:
 ```:Timetrap d```
 
-This will show the output in a buffer. You can change the records by hovering
-on the desired record and pressing one of the following key combinations (while in normal mode):
+This will show the output in a buffer. You can change the entries by hovering
+on the desired entry and pressing one of the following key combinations (while in normal mode):
 
 * `cs` - Change Start time
 * `ce` - Change End time
-* `cn` - Change Note (the record description)
-* `d` - Delete the record
+* `cn` - Change Note (the entry description)
+* `d` - Delete the entry
 * `q` - Quit the timetrap buffer
 
 ## Configuration
