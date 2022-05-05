@@ -14,6 +14,7 @@ will allow you to edit your time sheets using vim-like keybindings.
 ## Installation
 
 ### Using Packer.nvim
+Paste the following code along with your other plugins in the "packer.startup" function:
 ```
 use {
     "/home/andrea/Projects/timetrap.nvim",
