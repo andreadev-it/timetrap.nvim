@@ -15,7 +15,6 @@ will allow you to edit your time sheets using vim-like keybindings.
 
 ### Using Packer.nvim
 ```
-
 use {
     "/home/andrea/Projects/timetrap.nvim",
     requires = {
@@ -42,3 +41,21 @@ on the desired record and pressing one of the following key combinations (while 
 * `cn` - Change Note (the record description)
 * `d` - Delete the record
 * `q` - Quit the timetrap buffer
+
+## Configuration
+
+Here it is a list of options that can be passed to the "setup" function:
+* `display.win_type` - The type of window that should be launched when you type `:Timetrap d`. Available options: horizontal, vertical, float.
+* `display.border` - The border to be used for the floating windows. Options: single, rounded, double, none, solid, shadow.
+* `prompts` - What kind of prompts should be used to get user input. Options: input (classic vim input) or float.
+
+Example configuration:
+```
+require("timetrap_nvim").setup({
+    display = {
+        win_type = "float",
+        border = "rounded",
+    },
+    prompts = "float"
+})
+```
