@@ -4,7 +4,8 @@
 
 This plugin is meant to be a simple integration for the [timetrap timetracker](https://github.com/samg/timetrap).
 Most of the commands are currently just passed to it, but it includes improvements on the "t display" command, since it 
-will allow you to edit your time sheets using vim-like keybindings.
+will allow you to edit your time sheets using vim-like keybindings. It also prevents the other commands output to block
+the workflow with the annoying "Press ENTER or command" prompt.
 
 ## Prerequisites
 
@@ -17,7 +18,7 @@ will allow you to edit your time sheets using vim-like keybindings.
 Paste the following code along with your other plugins in the "packer.startup" function:
 ```
 use {
-    "/home/andrea/Projects/timetrap.nvim",
+    "andreadev-it/timetrap.nvim",
     requires = {
         "MunifTanjim/nui.nvim"
     },
