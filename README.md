@@ -44,6 +44,8 @@ on the desired entry and pressing one of the following key combinations (while i
 * `d` - Delete the entry
 * `q` - Quit the timetrap buffer
 
+![Timetrap.nvim usage](https://github.com/andreadev-it/timetrap.nvim/raw/main/github/usage.gif)
+
 ## Configuration
 
 Here it is a list of options that can be passed to the "setup" function:
