@@ -14,7 +14,9 @@ local timetrap_exec = function (str)
     else
         output = out_lines[1]
     end
+    vim.api.nvim_exec("redraw", false)
     print(output)
+    -- vim.api.nvim_echo({{output, 'None'}}, false, {})
 end
 
 

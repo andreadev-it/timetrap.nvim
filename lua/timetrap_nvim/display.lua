@@ -70,6 +70,13 @@ M.display_help = function ()
 
     vim.api.nvim_buf_set_option(buf, "modifiable", false)
 
+    vim.api.nvim_buf_set_keymap(buf, "n", "q", "", {
+        callback = function ()
+            help_window:unmount()
+        end,
+        noremap = true
+    })
+
     help_window:on(event.BufLeave, function ()
         help_window:unmount()
     end)
@@ -154,40 +161,117 @@ M.timetrap_display_close = function ()
     end
 end
 
+-- Delete record keymap
+local _keymap_delete_record = function (buf)
+    local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+
+    if record == nil then
+        return
+    end
+
+    local id = record.Id
+
+    utils.prompt("Deleting item with id " .. id .. ". Are you sure? (y/n)", configs.prompts,
+        function (choice)
+            if choice == "n" then
+                return
+            end
+
+            if choice ~= "y" then
+                print("Only 'y' and 'n' answers are accepted.")
+                return
+            end
+
+            local output = vim.api.nvim_exec("!t kill -y --id " .. id, true)
+
+            M.timetrap_display_open({buf = buf})
+        end,
+        function ()
+            print("Aborted.")
+        end
+    )
+end
+
+-- Change Start Time keymap
+local _keymap_change_start_time = function (buf)
+    local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+
+    if record == nil then
+        return
+    end
+
+    local id = record.Id
+
+    utils.prompt("Insert new starting time for item #"..id..":", configs.prompts,
+        function (value)
+
+            local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' -s "'.. value .. '"', true)
+            print(output)
+
+            M.timetrap_display_open({buf = buf})
+        end,
+        function ()
+            print("Aborted.")
+        end
+    )
+end
+
+-- Change End Time keymap
+local _keymap_change_end_time = function (buf)
+    local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+
+    if record == nil then
+        return
+    end
+
+    local id = record.Id
+
+    utils.prompt("Insert new ending time for item #"..id..":", configs.prompts,
+        function (value)
+
+            local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' -e "'.. value .. '"', true)
+            print(output)
+
+            M.timetrap_display_open({buf = buf})
+        end,
+        function ()
+            print("Aborted.")
+        end
+    )
+end
+
+-- Change a record note keymap
+local _keymap_change_note = function (buf)
+    local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+
+    if record == nil then
+        return
+    end
+
+    local id = record.Id
+
+    utils.prompt("Insert new note for item #"..id..":", configs.prompts,
+        function (value)
+
+            local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' '.. value , true)
+            print(output)
+
+            M.timetrap_display_open({buf = buf})
+        end,
+        function ()
+            print("Aborted.")
+        end
+    )
+
+end
+
 
 -- Add keymaps to the display buffer
 M.set_timetrap_display_keymaps = function (buf)
     -- Delete the record
     vim.api.nvim_buf_set_keymap(buf, "n", "d", "", {
         callback = function ()
-            local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
-
-            if record == nil then
-                return
-            end
-
-            local id = record.Id
-
-            utils.prompt("Deleting item with id " .. id .. ". Are you sure? (y/n)", configs.prompts,
-                function (choice)
-                    if choice == "n" then
-                        return
-                    end
-
-                    if choice ~= "y" then
-                        print("Only 'y' and 'n' answers are accepted.")
-                        return
-                    end
-
-                    local output = vim.api.nvim_exec("!t kill -y --id " .. id, true)
-
-                    M.timetrap_display_open({buf = buf})
-                end,
-                function ()
-                    print("Aborted.")
-                end
-            )
-
+            _keymap_delete_record(buf)
         end,
         noremap = true
     })
@@ -211,27 +295,7 @@ M.set_timetrap_display_keymaps = function (buf)
     -- Change starting time
     vim.api.nvim_buf_set_keymap(buf, "n", "cs", "", {
         callback = function ()
-            local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
-
-            if record == nil then
-                return
-            end
-
-            local id = record.Id
-
-            utils.prompt("Insert new starting time for item #"..id..":", configs.prompts,
-                function (value)
-
-                    local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' -s "'.. value .. '"', true)
-                    print(output)
-
-                    M.timetrap_display_open({buf = buf})
-                end,
-                function ()
-                    print("Aborted.")
-                end
-            )
-
+            _keymap_change_start_time(buf)
         end,
         noremap = true
     })
@@ -239,27 +303,7 @@ M.set_timetrap_display_keymaps = function (buf)
     -- Change ending time
     vim.api.nvim_buf_set_keymap(buf, "n", "ce", "", {
         callback = function ()
-            local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
-
-            if record == nil then
-                return
-            end
-
-            local id = record.Id
-
-            utils.prompt("Insert new ending time for item #"..id..":", configs.prompts,
-                function (value)
-
-                    local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' -e "'.. value .. '"', true)
-                    print(output)
-
-                    M.timetrap_display_open({buf = buf})
-                end,
-                function ()
-                    print("Aborted.")
-                end
-            )
-
+            _keymap_change_end_time(buf)
         end,
         noremap = true
     })
@@ -267,27 +311,7 @@ M.set_timetrap_display_keymaps = function (buf)
     -- Change note
     vim.api.nvim_buf_set_keymap(buf, "n", "cn", "", {
         callback = function ()
-            local record = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
-
-            if record == nil then
-                return
-            end
-
-            local id = record.Id
-
-            utils.prompt("Insert new note for item #"..id..":", configs.prompts,
-                function (value)
-
-                    local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' '.. value , true)
-                    print(output)
-
-                    M.timetrap_display_open({buf = buf})
-                end,
-                function ()
-                    print("Aborted.")
-                end
-            )
-
+            _keymap_change_note(buf)
         end,
         noremap = true
     })
