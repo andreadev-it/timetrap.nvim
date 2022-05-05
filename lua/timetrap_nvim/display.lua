@@ -15,7 +15,7 @@ M.timetrap_display_write = function (buf)
     local lines = utils.splitLines(output)
     table.remove(lines, 1)
 
-    if #table <= 1 then
+    if #lines <= 1 then
         lines = {
             "No entries found in the current sheet."
         }
