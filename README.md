@@ -6,6 +6,11 @@ This plugin is meant to be a simple integration for the [timetrap timetracker](h
 Most of the commands are currently just passed to it, but it includes improvements on the "t display" command, since it 
 will allow you to edit your time sheets using vim-like keybindings.
 
+## Prerequisites
+
+* neovim v. 0.7+
+* timetrap available on the system (using the shorthand `t [command]`)
+
 ## Installation
 
 ### Using Packer.nvim
