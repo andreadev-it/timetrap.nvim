@@ -7,8 +7,7 @@ M.get_current_task = function ()
     local lines = utils.split_lines(output)
 
     local task = nil
-    local line = nil
-    for _, line = ipairs(lines) do
+    for _, line in ipairs(lines) do
         if string.sub(line, 1, 1) == "*" then
             task = line
             break
