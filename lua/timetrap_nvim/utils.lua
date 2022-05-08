@@ -43,7 +43,16 @@ local showFloatingPrompt = function (display_text, on_submit, on_close)
     end)
 end
 
-local splitLines = function (str)
+local split_string = function (str, sep)
+    local parts = {}
+    for s in str:gmatch("[^" .. sep .. "]+") do
+        table.insert(parts, s)
+    end
+
+    return parts
+end
+
+local split_lines = function (str)
     local lines = {}
     for s in str:gmatch("[^\r\n]+") do
         table.insert(lines, s)
@@ -137,7 +146,7 @@ M.prompt = function (display_text, type, on_submit, on_close)
     end
 end
 
-M.splitLines = splitLines
+M.split_lines = split_lines
 
 M.parseRecordLine = parseRecordLine
 
