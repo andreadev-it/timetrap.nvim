@@ -12,7 +12,7 @@ local M = {}
 M.timetrap_display_write = function (buf)
     local output = vim.api.nvim_exec("!t d --ids", true)
 
-    local lines = utils.splitLines(output)
+    local lines = utils.split_lines(output)
     table.remove(lines, 1)
 
     if #lines <= 1 then
