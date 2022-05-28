@@ -1,8 +1,6 @@
 local utils = require("timetrap_nvim.utils")
 local configs = require("timetrap_nvim.config")
-local Popup = require("nui.popup")
-local Split = require("nui.split")
-local event = require("nui.utils.autocmd").event
+local common_cmd = require("timetrap_nvim.commands.common")
 
 local cur_win = nil
 
@@ -12,7 +10,7 @@ local M = {}
 M.timetrap_display_write = function (buf)
     local output = vim.api.nvim_exec("!t d --ids", true)
 
-    local lines = utils.splitLines(output)
+    local lines = utils.split_lines(output)
     table.remove(lines, 1)
 
     if #lines <= 1 then
@@ -28,7 +26,7 @@ M.timetrap_display_write = function (buf)
     vim.api.nvim_buf_set_option(buf, "modifiable", false)
 end
 
-M.display_help = function ()
+M.show_help = function ()
 
     local lines = {
         "============== KEYBINDINGS =============",
@@ -46,115 +44,22 @@ M.display_help = function ()
         "?  - Show this help"
     }
 
-    local w = 40
-    local h = 15
-
-    local help_window = Popup({
-        position = "50%",
-        size = {
-            width = w,
-            height = h,
-        },
-        enter = true,
-        border = {
-            padding = {
-                left = 1,
-                right = 1,
-            },
-            style = configs.display.border
-        },
-        win_options = {
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-        },
-    })
-
-    help_window:mount()
-
-    local buf = help_window.bufnr
-
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-
-    vim.api.nvim_buf_set_option(buf, "modifiable", false)
-
-    vim.api.nvim_buf_set_keymap(buf, "n", "q", "", {
-        callback = function ()
-            help_window:unmount()
-        end,
-        noremap = true
-    })
-
-    help_window:on(event.BufLeave, function ()
-        help_window:unmount()
-    end)
+    common_cmd.show_help_window(lines)
 end
 
 -- Display the "t display" output in a buffer
 M.timetrap_display_open = function (opts)
-    opts = opts or {}
-
-    local win_type = opts.win_type or configs.display.win_type
-
-    local isRefresh = cur_win ~= nil
-
-    if isRefresh == false then
-
-        local window = nil
-
-        if win_type == "float" then
-            local w = math.floor(vim.o.columns * 0.8)
-            local h = math.floor(vim.o.lines * 0.8)
-
-            window = Popup({
-                position = "50%",
-                size = {
-                    width = w,
-                    height = h,
-                },
-                enter = true,
-                border = {
-                    padding = {
-                        left = 1,
-                        right = 1,
-                    },
-                    style = configs.display.border
-                },
-                win_options = {
-                    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-                },
-                zindex = 25,
-            })
-
-        elseif win_type == "horizontal" then
-            window = Split({
-                relative = "editor",
-                position = "top",
-                size = "40%",
-            })
-
-        elseif win_type == "vertical" then
-            window = Split({
-                relative = "editor",
-                position = "right",
-                size = "25%",
-            })
-        end
-
-
-        window:mount()
-
-        -- unmount component when cursor leaves buffer
-        window:on(event.WinClosed, function()
-            M.timetrap_display_close()
-        end)
-
-        cur_win = window
+    local is_refresh = true
+    if cur_win == nil then
+        is_refresh = false
+        cur_win = common_cmd.create_command_window(opts)
     end
 
     local buf = cur_win.bufnr
 
     M.timetrap_display_write(buf)
 
-    if isRefresh == false then
+    if is_refresh == false then
         M.set_timetrap_display_keymaps(buf)
     end
 end
@@ -169,7 +74,7 @@ end
 
 -- Delete entry keymap
 local _keymap_delete_entry = function (buf)
-    local entry = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+    local entry = utils.parse_record_line(buf, vim.api.nvim_win_get_cursor(0))
 
     if entry == nil then
         return
@@ -200,7 +105,7 @@ end
 
 -- Change Start Time keymap
 local _keymap_change_start_time = function (buf)
-    local entry = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+    local entry = utils.parse_record_line(buf, vim.api.nvim_win_get_cursor(0))
 
     if entry == nil then
         return
@@ -214,7 +119,7 @@ local _keymap_change_start_time = function (buf)
             local output = vim.api.nvim_exec('!t edit --id ' .. id .. ' -s "'.. value .. '"', true)
             print(output)
 
-            M.timetrap_display_open({buf = buf})
+            M.timetrap_display_open()
         end,
         function ()
             print("Aborted.")
@@ -224,7 +129,7 @@ end
 
 -- Change End Time keymap
 local _keymap_change_end_time = function (buf)
-    local entry = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+    local entry = utils.parse_record_line(buf, vim.api.nvim_win_get_cursor(0))
 
     if entry == nil then
         return
@@ -248,7 +153,7 @@ end
 
 -- Change a entry note keymap
 local _keymap_change_note = function (buf)
-    local entry = utils.parseRecordLine(buf, vim.api.nvim_win_get_cursor(0))
+    local entry = utils.parse_record_line(buf, vim.api.nvim_win_get_cursor(0))
 
     if entry == nil then
         return
@@ -324,7 +229,7 @@ M.set_timetrap_display_keymaps = function (buf)
 
     vim.api.nvim_buf_set_keymap(buf, "n", "?", "", {
         callback = function ()
-            M.display_help()
+            M.show_help()
         end,
         noremap = true
     })

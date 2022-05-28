@@ -43,15 +43,6 @@ local showFloatingPrompt = function (display_text, on_submit, on_close)
     end)
 end
 
-local split_string = function (str, sep)
-    local parts = {}
-    for s in str:gmatch("[^" .. sep .. "]+") do
-        table.insert(parts, s)
-    end
-
-    return parts
-end
-
 local split_lines = function (str)
     local lines = {}
     for s in str:gmatch("[^\r\n]+") do
@@ -62,7 +53,7 @@ local split_lines = function (str)
 end
 
 -- Parse a line that corresponds to a entry in the display table. If it is not a entry, return nil
-local parseRecordLine = function (buf, cursor)
+local parse_record_line = function (buf, cursor)
     -- Get info positions in buffer (headers are in the second line)
     local headers_str = vim.api.nvim_buf_get_lines(buf, 1, 2, false)
     headers_str = headers_str[1]
@@ -134,6 +125,42 @@ local parseRecordLine = function (buf, cursor)
     return parsed
 end
 
+
+local parse_sheet_line = function (buf, cursor)
+    -- Get info positions in buffer (headers are in the second line)
+    local headers_str = vim.api.nvim_buf_get_lines(buf, 0, 1, false)
+    headers_str = headers_str[1]
+
+    local sheet = {}
+
+    local r, _ = unpack(cursor)
+    r = r - 1
+
+    if r == 0 then
+        return nil
+    end
+
+    local cur_line = vim.api.nvim_buf_get_lines(buf, r, r+1, false)
+    cur_line = cur_line[1]
+
+    local first_char = cur_line:sub(1,1)
+    if first_char == "*" then
+        sheet.is_active = true
+    else
+        sheet.is_active = false
+    end
+
+    local s, _ = headers_str:find("Running")
+    sheet.name = cur_line:sub(2,s):match("^%s*(.-)%s*$")
+
+    return sheet
+end
+
+local print_silently = function (out)
+    vim.api.nvim_exec("redraw", false)
+    print(out)
+end
+
 -- Module exports
 local M = {}
 
@@ -148,6 +175,9 @@ end
 
 M.split_lines = split_lines
 
-M.parseRecordLine = parseRecordLine
+M.parse_record_line = parse_record_line
+M.parse_sheet_line = parse_sheet_line
+
+M.print_silently = print_silently
 
 return M

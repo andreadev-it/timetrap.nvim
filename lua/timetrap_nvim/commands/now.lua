@@ -3,7 +3,7 @@ local utils = require("timetrap_nvim.utils")
 local M = {}
 
 M.get_current_task = function ()
-    local output = vim.api.nvim_exec("!t now")
+    local output = vim.api.nvim_exec("!t now", true)
     local lines = utils.split_lines(output)
 
     local task = nil

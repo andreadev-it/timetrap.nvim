@@ -1,12 +1,13 @@
 local utils = require("timetrap_nvim.utils")
 local display = require("timetrap_nvim.commands.display")
+local list = require("timetrap_nvim.commands.list")
 local configs = require("timetrap_nvim.config")
 
 local M = {}
 
 local timetrap_exec = function (str)
     local output = vim.api.nvim_exec("!t " .. str, true)
-    local out_lines = utils.splitLines(output)
+    local out_lines = utils.split_lines(output)
 
     table.remove(out_lines,1)
     if #out_lines > 1 then
@@ -14,9 +15,7 @@ local timetrap_exec = function (str)
     else
         output = out_lines[1]
     end
-    vim.api.nvim_exec("redraw", false)
-    print(output)
-    -- vim.api.nvim_echo({{output, 'None'}}, false, {})
+    utils.print_silently(output)
 end
 
 
@@ -45,6 +44,23 @@ local add_commands = function ()
         "TimetrapClose",
         function ()
             display.timetrap_display_close()
+            list.timetrap_list_close()
+        end,
+        {}
+    )
+
+    vim.api.nvim_create_user_command(
+        "TimetrapDisplay",
+        function ()
+            display.timetrap_display_open()
+        end,
+        {}
+    )
+
+    vim.api.nvim_create_user_command(
+        "TimetrapList",
+        function ()
+            list.timetrap_list_open()
         end,
         {}
     )
