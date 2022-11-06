@@ -68,6 +68,9 @@ end
 
 M.setup = function (opts)
 
+    if opts.display == nil then
+        opts.display = {}
+    end
     configs.display.win_type = opts.display.win_type or configs.display.win_type
     configs.display.border = opts.display.border or configs.display.border
     configs.prompts = opts.prompts or configs.prompts
