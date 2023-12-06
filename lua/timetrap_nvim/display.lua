@@ -106,6 +106,7 @@ M.timetrap_display_open = function (opts)
 
             window = Popup({
                 position = "50%",
+                relative = "editor",
                 size = {
                     width = w,
                     height = h,
