@@ -36,7 +36,7 @@ local add_commands = function ()
         {
             nargs = "*",
             complete = function ()
-                return {"d", "in", "out", "list"}
+                return {"d", "in", "out", "list", "sheet"}
             end
         }
     )
